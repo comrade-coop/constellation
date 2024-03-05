@@ -9,6 +9,7 @@ go_library(
         "main.go",
         "run.go",
         "test.go",
+        "extend.go"
     ],
     importpath = "github.com/edgelesssys/constellation/v2/bootstrapper/cmd/bootstrapper",
     visibility = ["//visibility:private"],

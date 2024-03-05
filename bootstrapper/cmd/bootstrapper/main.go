@@ -172,4 +172,5 @@ func main() {
 	fileHandler := file.NewHandler(fs)
 
 	run(issuer, openDevice, fileHandler, clusterInitJoiner, metadataAPI, bindIP, bindPort, log)
+	applyCustomManifest()
 }

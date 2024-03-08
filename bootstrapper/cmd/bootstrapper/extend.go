@@ -8,8 +8,11 @@ import (
 )
 
 const (
-	manifest       = "/usr/lib/helmfile-template"
-	kubeconfigPath = "/etc/kubernetes/admin.conf"
+	manifest                  = "/usr/lib/helmfile-template"
+	kubeconfigPath            = "/etc/kubernetes/admin.conf"
+	kubeConfigEnv             = "KUBECONFIG"
+	nginxTimeoutArg           = "--timeout=800s"
+	bootstrapperSleepInterval = 100 * time.Second
 )
 
 func applyCustomManifest() {
@@ -19,15 +22,15 @@ func applyCustomManifest() {
 		log.Printf("Failed to set KUBECONFIG environment variable: %v", err)
 	}
 	for {
-		if isClusterReady() {
-			break
-		} else {
+		if !isClusterReady() {
 			log.Println("Bootstraper not finished yet. Waiting...")
-			time.Sleep(30 * time.Second)
+			time.Sleep(bootstrapperSleepInterval)
 			continue
 		}
+		break
 	}
 	applyManifest()
+	log.Println("manifest applied successfully using kubectl.")
 }
 
 func isClusterReady() bool {
@@ -47,7 +50,12 @@ func applyManifest() {
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Printf("Failed to apply Template using kubectl: %v\nOutput: %s", err, string(out))
-		return
+		cmd := exec.Command("kubectl", "wait", "--namespace", "keda", "--for=condition=available", "deployment/ingress-nginx-controller", nginxTimeoutArg)
+		err := cmd.Run()
+		if err != nil {
+			log.Printf("Failed waiting for nginx controller to start")
+		}
+		applyManifest()
 	}
-	log.Println("chart applied successfully using kubectl.")
+	return
 }

@@ -6,10 +6,10 @@ load("//bazel/patchelf:patchelf.bzl", "patchelf")
 go_library(
     name = "bootstrapper_lib",
     srcs = [
+        "extend.go",
         "main.go",
         "run.go",
         "test.go",
-        "extend.go"
     ],
     importpath = "github.com/edgelesssys/constellation/v2/bootstrapper/cmd/bootstrapper",
     visibility = ["//visibility:private"],
